@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>인천공항고등학교 도서관 희망도서 신청</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Noto+Sans+KR:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --paper:#F2EFE6;
+    --paper-dim:#E9E4D5;
+    --ink:#14213D;
+    --ink-soft:#4A5578;
+    --gold:#C99A2E;
+    --gold-dim:#E4C877;
+    --teal:#1F6F5C;
+    --red:#B23A3A;
+    --line: rgba(20,33,61,0.22);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at top left, rgba(201,154,46,0.08), transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(31,111,92,0.07), transparent 50%),
+      var(--paper);
+    color:var(--ink);
+    font-family:'Noto Sans KR', sans-serif;
+    min-height:100vh;
+    line-height:1.5;
+  }
+  .page-wrap{ padding:30px 16px 60px; }
+
+  /* ===== TOP NAV ===== */
+  .top-nav{
+    background:var(--ink);
+    color:var(--paper);
+  }
+  .nav-inner{
+    max-width:1180px;
+    margin:0 auto;
+    padding:14px 20px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .nav-brand{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    letter-spacing:-0.01em;
+  }
+  .nav-tabs{
+    display:inline-flex;
+    background:rgba(242,239,230,0.1);
+    border-radius:999px;
+    padding:4px;
+    gap:2px;
+  }
+  .nav-tab{
+    border:none;
+    background:transparent;
+    color:rgba(242,239,230,0.65);
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+    padding:8px 18px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:background .15s ease, color .15s ease;
+  }
+  .nav-tab:hover{ color:var(--paper); }
+  .nav-tab.active{
+    background:var(--gold);
+    color:var(--ink);
+  }
+
+  /* ===== HERO ===== */
+  .hero{
+    max-width:920px;
+    margin:34px auto 26px;
+    text-align:center;
+  }
+  .hero h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:clamp(24px,4vw,38px);
+    margin:0 0 10px;
+    letter-spacing:-0.02em;
+    color:var(--ink);
+  }
+  .hero p{
+    color:var(--ink-soft);
+    font-size:15px;
+    margin:0 0 6px;
+  }
+  .hero .deadline-line{
+    font-family:'Space Mono',monospace;
+    font-size:13px;
+    color:var(--teal);
+    font-weight:700;
+  }
+
+  /* ===== SEARCH CARD (like reference photo) ===== */
+  .search-card{
+    max-width:640px;
+    margin:0 auto 30px;
+    background:#fff;
+    border-radius:18px;
+    padding:24px 26px 26px;
+    box-shadow: 0 20px 45px -28px rgba(20,33,61,0.35);
+    border:1px solid rgba(20,33,61,0.08);
+  }
+  .search-card-head{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:16.5px;
+    color:var(--ink);
+    margin-bottom:18px;
+    text-align:center;
+  }
+  .search-card-head svg{width:19px;height:19px;color:var(--teal); flex-shrink:0;}
+  .search-input-row{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .search-input-row input{
+    flex:1;
+    min-width:160px;
+    border:2px solid var(--line);
+    border-radius:12px;
+    padding:12px 14px;
+    font-family:'Noto Sans KR',sans-serif;
+    font-size:14.5px;
+    color:var(--ink);
+    outline:none;
+    background:var(--paper);
+    transition:border-color .15s ease;
+  }
+  .search-input-row input:focus{ border-color:var(--teal); }
+  .search-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:7px;
+    background:var(--ink);
+    color:var(--paper);
+    border:none;
+    border-radius:12px;
+    padding:12px 18px;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:13.5px;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:background .15s ease, transform .12s ease;
+  }
+  .search-btn:hover{ background:var(--teal); transform:translateY(-1px); }
+  .search-btn svg{width:15px;height:15px;}
+
+  /* ===== FORM CARD ===== */
+  .form-card{
+    max-width:920px;
+    margin:0 auto;
+    background:#fff;
+    border-radius:20px;
+    box-shadow: 0 30px 60px -25px rgba(20,33,61,0.35), 0 2px 0 rgba(20,33,61,0.05);
+    border:1px solid rgba(20,33,61,0.08);
+    padding:36px 40px 32px;
+  }
+  @media (max-width:560px){
+    .form-card{ padding:26px 22px 24px; }
+  }
+
+  .panel-title{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:22px;
+    font-weight:700;
+    margin:0 0 22px;
+    color:var(--ink);
+  }
+
+  .field-group{margin-bottom:18px;}
+  .field-row{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:12px;
+  }
+  @media (max-width:520px){ .field-row{grid-template-columns:1fr;} }
+
+  label{
+    display:block;
+    font-family:'Space Grotesk',sans-serif;
+    font-size:14.5px;
+    font-weight:700;
+    letter-spacing:.02em;
+    text-transform:none;
+    color:var(--ink);
+    margin-bottom:8px;
+  }
+  label .req{color:var(--red); margin-left:3px;}
+  label .opt{color:#9aa3bb; font-weight:500; text-transform:none; letter-spacing:0; margin-left:4px;}
+
+  input[type=text], input[type=password], input[type=datetime-local], textarea{
+    width:100%;
+    border:none;
+    border-bottom:2px solid var(--line);
+    background:transparent;
+    padding:9px 2px;
+    font-family:'Noto Sans KR',sans-serif;
+    font-size:15px;
+    color:var(--ink);
+    outline:none;
+    transition:border-color .15s ease;
+  }
+  input:focus, textarea:focus{ border-color:var(--teal); }
+  input.invalid{ border-color:var(--red); }
+  textarea{resize:vertical; min-height:56px; font-size:14px;}
+
+  /* 신청자 구분 토글 */
+  .seg-toggle{
+    display:inline-flex;
+    border:2px solid var(--ink);
+    border-radius:999px;
+    overflow:hidden;
+  }
+  .seg-toggle input[type=radio]{
+    position:absolute;
+    opacity:0;
+    width:1px;height:1px;
+    pointer-events:none;
+  }
+  .seg-toggle label{
+    padding:10px 26px;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    text-transform:none;
+    letter-spacing:0;
+    cursor:pointer;
+    color:var(--ink);
+    margin:0;
+    transition:background .15s ease,color .15s ease;
+    user-select:none;
+  }
+  .seg-toggle input[type=radio]:checked + label{
+    background:var(--ink);
+    color:var(--paper);
+  }
+  .seg-toggle input[type=radio]:focus-visible + label{
+    outline:2px solid var(--teal);
+    outline-offset:2px;
+  }
+
+  /* ===== 신청 도서(다건) 블록 ===== */
+  .book-block{
+    background:var(--paper);
+    border:1px solid rgba(20,33,61,0.1);
+    border-radius:14px;
+    padding:18px 20px 6px;
+    margin-bottom:14px;
+  }
+  .book-block-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:14px;
+  }
+  .book-block-title{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:13.5px;
+    letter-spacing:.04em;
+    color:var(--teal);
+  }
+  .book-remove-btn{
+    border:none;
+    background:transparent;
+    color:var(--red);
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:12.5px;
+    cursor:pointer;
+    padding:4px 8px;
+    border-radius:8px;
+    transition:background .15s ease;
+  }
+  .book-remove-btn:hover{ background:rgba(178,58,58,0.1); }
+
+  .add-book-btn{
+    display:block;
+    width:100%;
+    border:2px dashed var(--line);
+    background:transparent;
+    color:var(--ink-soft);
+    border-radius:14px;
+    padding:13px 16px;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+    margin-bottom:6px;
+    transition:border-color .15s ease, color .15s ease, background .15s ease;
+  }
+  .add-book-btn:hover:not(:disabled){
+    border-color:var(--teal);
+    color:var(--teal);
+    background:rgba(31,111,92,0.05);
+  }
+  .add-book-btn:disabled{
+    cursor:default;
+    opacity:.6;
+  }
+
+  .submit-btn{
+    width:100%;
+    margin-top:6px;
+    background:var(--ink);
+    color:var(--paper);
+    border:none;
+    border-radius:999px;
+    padding:15px 20px;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:15px;
+    letter-spacing:.02em;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    transition:transform .12s ease, background .15s ease;
+  }
+  .submit-btn:hover{ background:var(--teal); transform:translateY(-1px); }
+  .submit-btn:active{ transform:translateY(0); }
+  .submit-btn svg{width:16px;height:16px; transition:transform .2s ease;}
+  .submit-btn:hover svg{ transform:translateX(4px); }
+
+  .error-msg{
+    font-size:12.5px;
+    color:var(--red);
+    margin-top:-12px;
+    margin-bottom:16px;
+    display:none;
+    font-weight:600;
+  }
+  .error-msg.show{display:block;}
+
+  /* toast */
+  .toast{
+    position:fixed;
+    left:50%;
+    bottom:26px;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--teal);
+    color:#fff;
+    padding:14px 22px;
+    border-radius:999px;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    box-shadow:0 15px 30px -10px rgba(31,111,92,0.6);
+    opacity:0;
+    pointer-events:none;
+    transition:all .3s ease;
+    z-index:50;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  footer{
+    max-width:920px;
+    margin:36px auto 0;
+    text-align:center;
+    font-size:12px;
+    color:var(--ink-soft);
+  }
+
+  /* ===== EXPIRED VIEW ===== */
+  .expired-wrap{
+    max-width:520px;
+    margin:16vh auto 0;
+    text-align:center;
+  }
+  .expired-notice{
+    font-family:'Noto Sans KR',sans-serif;
+    font-weight:700;
+    font-size:26px;
+    color:var(--ink);
+    margin:0;
+  }
+
+  /* ===== ADMIN AUTH ===== */
+  .auth-wrap{
+    max-width:400px;
+    margin:10vh auto 0;
+  }
+  .auth-card{
+    background:#fff;
+    border-radius:20px;
+    padding:34px 32px;
+    text-align:center;
+    box-shadow: 0 30px 60px -25px rgba(20,33,61,0.35);
+    border:1px solid rgba(20,33,61,0.08);
+  }
+  .auth-icon{
+    width:48px;height:48px;
+    border-radius:50%;
+    background:var(--paper-dim);
+    display:flex;align-items:center;justify-content:center;
+    margin:0 auto 16px;
+    color:var(--ink);
+  }
+  .auth-icon svg{width:22px;height:22px;}
+  .auth-card h2{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:19px;
+    margin:0 0 6px;
+  }
+  .auth-card p{
+    color:var(--ink-soft);
+    font-size:13.5px;
+    margin:0 0 18px;
+  }
+  .auth-card input{
+    text-align:center;
+    border:2px solid var(--line);
+    border-radius:12px;
+    padding:12px;
+    margin-bottom:8px;
+  }
+  .auth-card .error-msg{ text-align:center; margin-top:0; }
+  .auth-card .submit-btn{ margin-top:10px; }
+
+  /* ===== ADMIN VIEW ===== */
+  .admin-eyebrow{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--teal);
+    margin-bottom:6px;
+  }
+  .admin-top{
+    max-width:1180px;
+    margin:0 auto 22px;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .admin-top h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:23px;
+    margin:0;
+    font-weight:700;
+  }
+  .admin-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .admin-actions span{font-family:'Space Mono',monospace;font-size:12px;color:var(--ink-soft);}
+  .admin-btn{
+    border:2px solid var(--ink);
+    background:transparent;
+    color:var(--ink);
+    border-radius:999px;
+    padding:9px 18px;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:13px;
+    cursor:pointer;
+  }
+  .admin-btn:hover{background:var(--ink); color:var(--paper);}
+  .admin-btn.primary{background:var(--ink); color:var(--paper);}
+  .admin-btn.primary:hover{background:var(--teal); border-color:var(--teal);}
+
+  .deadline-card{
+    max-width:1180px;
+    margin:0 auto 24px;
+    background:#fff;
+    border-radius:16px;
+    padding:22px 26px;
+    box-shadow:0 20px 40px -28px rgba(20,33,61,0.3);
+    border:1px solid rgba(20,33,61,0.08);
+  }
+  .deadline-card-label{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:10px;
+  }
+  .deadline-card-row{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    align-items:flex-end;
+    margin-bottom:10px;
+  }
+  .deadline-card-row input{
+    border:2px solid var(--line);
+    border-radius:10px;
+    padding:9px 12px;
+    font-size:14px;
+    max-width:260px;
+  }
+  .setting-field{ display:flex; flex-direction:column; gap:6px; }
+  .setting-label{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  .deadline-current{
+    font-size:13.5px;
+    color:var(--ink-soft);
+  }
+  .deadline-current b{ color:var(--ink); }
+
+  .archive-box{
+    margin-top:18px;
+    padding-top:16px;
+    border-top:1px dashed var(--line);
+  }
+
+  .admin-table-wrap{
+    max-width:1180px;
+    margin:0 auto;
+    background:#fff;
+    border-radius:16px;
+    overflow-x:auto;
+    box-shadow:0 20px 40px -25px rgba(20,33,61,0.3);
+    border:1px solid rgba(20,33,61,0.08);
+  }
+  table{width:100%; border-collapse:collapse; font-size:13.5px; min-width:1040px;}
+  thead th{
+    background:var(--ink);
+    color:var(--paper);
+    text-align:left;
+    padding:12px 14px;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:11.5px;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    white-space:nowrap;
+  }
+  tbody td{padding:11px 14px; border-top:1px solid rgba(20,33,61,0.08); vertical-align:top;}
+  tbody tr:nth-child(even){background:rgba(20,33,61,0.02);}
+  .admin-empty{padding:40px; text-align:center; color:var(--ink-soft);}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+(function(){
+  // ---- 설정 ----
+  const DEFAULT_SCHOOL_NAME = "인천공항고등학교";
+  const DEFAULT_LIBRARY_NAME = "백운서랑도서관";
+  const DEFAULT_APPLICANT_TYPE1_LABEL = "학생";
+  const DEFAULT_APPLICANT_TYPE2_LABEL = "교직원";
+  const SEARCH_URL = "https://m.site.naver.com/2eDnu";
+  const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbw1BFVGt1CLIcUGuJHjk-xa1FVkESEdmgHtl50aoEVsjPFMJu3UT6vzVnxRysqH1373wA/exec";
+  const DEFAULT_DEADLINE_ISO = "2026-08-26T23:59:59+09:00";
+  const DEFAULT_MAX_BOOKS_STUDENT = 3;
+  const DEFAULT_MAX_BOOKS_TEACHER = 5;
+  const ADMIN_PASSWORD = "0323";
+
+  let SCHOOL_NAME = DEFAULT_SCHOOL_NAME;
+  let LIBRARY_NAME = DEFAULT_LIBRARY_NAME;
+  let APPLICANT_TYPE1_LABEL = DEFAULT_APPLICANT_TYPE1_LABEL;
+  let APPLICANT_TYPE2_LABEL = DEFAULT_APPLICANT_TYPE2_LABEL;
+  let DEADLINE = new Date(DEFAULT_DEADLINE_ISO);
+  let MAX_BOOKS_STUDENT = DEFAULT_MAX_BOOKS_STUDENT;
+  let MAX_BOOKS_TEACHER = DEFAULT_MAX_BOOKS_TEACHER;
+  let CURRENT_ROUND_LABEL = '';
+  let isAdminAuthed = false;
+
+  function siteFullName(){ return SCHOOL_NAME + ' ' + LIBRARY_NAME; }
+  function pageTitleText(){ return SCHOOL_NAME + ' 도서관 희망도서 신청'; }
+
+  const app = document.getElementById('app');
+
+  function isWebAppConfigured(){
+    return WEBAPP_URL.indexOf('PASTE_YOUR_') !== 0;
+  }
+
+  function svgIcon(name){
+    if(name==='arrow'){
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+    }
+    if(name==='check'){
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+    }
+    if(name==='search'){
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>';
+    }
+    if(name==='lock'){
+      return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>';
+    }
+    return '';
+  }
+
+  function escapeHTML(str){
+    return String(str==null ? '' : str).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  function applySettingsData(data){
+    if(data && data.deadline){
+      const d = new Date(data.deadline);
+      if(!isNaN(d.getTime())) DEADLINE = d;
+    }
+    if(data && data.maxBooksStudent){
+      const n = parseInt(data.maxBooksStudent, 10);
+      if(!isNaN(n) && n > 0) MAX_BOOKS_STUDENT = n;
+    }
+    if(data && data.maxBooksTeacher){
+      const n = parseInt(data.maxBooksTeacher, 10);
+      if(!isNaN(n) && n > 0) MAX_BOOKS_TEACHER = n;
+    }
+    if(data && typeof data.currentRoundLabel === 'string'){
+      CURRENT_ROUND_LABEL = data.currentRoundLabel;
+    }
+    if(data && data.schoolName){ SCHOOL_NAME = data.schoolName; }
+    if(data && data.libraryName){ LIBRARY_NAME = data.libraryName; }
+    if(data && data.applicantType1Label){ APPLICANT_TYPE1_LABEL = data.applicantType1Label; }
+    if(data && data.applicantType2Label){ APPLICANT_TYPE2_LABEL = data.applicantType2Label; }
+  }
+
+  async function loadSettings(){
+    try{
+      const res = await fetch(WEBAPP_URL + '?action=settings');
+      const data = await res.json();
+      applySettingsData(data);
+    }catch(e){ /* 아직 설정된 값 없음 - 기본값 사용 */ }
+    finally{
+      settingsLoaded = true;
+    }
+  }
+
+  function isExpiredNow(){ return Date.now() > DEADLINE.getTime(); }
+
+  function formatDeadlineDisplay(){
+    return DEADLINE.toLocaleString('ko-KR', {year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'});
+  }
+
+  function formatDeadlineShort(){
+    return DEADLINE.toLocaleDateString('ko-KR', {year:'numeric', month:'2-digit', day:'2-digit'});
+  }
+
+  function deadlineToDatetimeLocalValue(){
+    const d = DEADLINE;
+    const pad = function(n){ return String(n).padStart(2,'0'); };
+    return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes());
+  }
+
+  // ================= 상단 네비게이션 =================
+  function renderTopNav(active){
+    return '<div class="top-nav"><div class="nav-inner">' +
+      '<div class="nav-brand">'+escapeHTML(siteFullName())+'</div>' +
+      '<div class="nav-tabs">' +
+        '<button class="nav-tab'+(active==='apply'?' active':'')+'" data-nav="apply">신청하기</button>' +
+        '<button class="nav-tab'+(active==='admin'?' active':'')+'" data-nav="admin">관리자</button>' +
+      '</div>' +
+    '</div></div>';
+  }
+
+  function bindNav(){
+    document.querySelectorAll('.nav-tab').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        navigateTo(btn.getAttribute('data-nav'));
+      });
+    });
+  }
+
+  let currentView = 'apply';
+
+  function navigateTo(view){
+    currentView = view;
+    if(view === 'admin'){
+      renderAdminEntry();
+    } else {
+      renderApplyView();
+    }
+    window.scrollTo(0,0);
+  }
+
+  // ================= 신청 화면 =================
+  let settingsLoaded = false;
+
+  function renderApplyView(){
+    if(!settingsLoaded){
+      renderLoadingSkeleton();
+      return;
+    }
+    if(isExpiredNow()){
+      renderExpired();
+    } else {
+      renderForm();
+    }
+  }
+
+  function renderLoadingSkeleton(){
+    app.innerHTML =
+      renderTopNav('apply') +
+      '<div class="page-wrap">' +
+        '<div class="expired-wrap">' +
+          '<p style="color:var(--ink-soft);font-size:15px;">불러오는 중...</p>' +
+        '</div>' +
+      '</div>';
+    bindNav();
+  }
+
+  function renderExpired(){
+    app.innerHTML =
+      renderTopNav('apply') +
+      '<div class="page-wrap">' +
+        '<div class="expired-wrap">' +
+          '<p class="expired-notice">신청기한이 지났습니다.</p>' +
+        '</div>' +
+      '</div>';
+    bindNav();
+  }
+
+  function renderForm(){
+    app.innerHTML =
+      renderTopNav('apply') +
+      '<div class="page-wrap">' +
+
+      '<div class="hero">' +
+        '<h1>'+escapeHTML(pageTitleText())+'</h1>' +
+        '<p class="deadline-line">신청기한 ~ '+formatDeadlineShort()+' 까지</p>' +
+      '</div>' +
+
+      '<div class="search-card">' +
+        '<div class="search-card-head">'+svgIcon('search')+'<span>신청 전 소장 여부를 먼저 확인해보세요</span></div>' +
+        '<div class="search-input-row">' +
+          '<button type="button" class="search-btn" id="catalogSearchBtn">'+svgIcon('search')+'<span>우리학교소장도서 검색</span></button>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="form-card">' +
+        '<h2 class="panel-title">희망도서 신청서</h2>' +
+
+        '<div class="field-group">' +
+          '<label>신청자 구분<span class="req">*</span></label>' +
+          '<div class="seg-toggle" role="radiogroup" aria-label="신청자 구분">' +
+            '<input type="radio" name="applicant" id="app-student" value="'+escapeHTML(APPLICANT_TYPE1_LABEL)+'" checked>' +
+            '<label for="app-student">'+escapeHTML(APPLICANT_TYPE1_LABEL)+'</label>' +
+            '<input type="radio" name="applicant" id="app-teacher" value="'+escapeHTML(APPLICANT_TYPE2_LABEL)+'">' +
+            '<label for="app-teacher">'+escapeHTML(APPLICANT_TYPE2_LABEL)+'</label>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="field-row" id="row-student" style="grid-template-columns:1fr 1fr;">' +
+          '<div class="field-group"><label>학년<span class="req">*</span></label><input type="text" id="f-grade"></div>' +
+          '<div class="field-group"><label>반<span class="req">*</span></label><input type="text" id="f-class"></div>' +
+        '</div>' +
+        '<div class="field-row" id="row-teacher" style="display:none;">' +
+          '<div class="field-group" style="grid-column:1/-1;"><label>소속<span class="req">*</span></label><input type="text" id="f-affil" placeholder="예: 국어과"></div>' +
+        '</div>' +
+        '<div class="field-group"><label>이름<span class="req">*</span></label><input type="text" id="f-name"></div>' +
+        '<div class="error-msg" id="err-who">필수 항목을 모두 입력해 주세요.</div>' +
+
+        '<div id="books-container"></div>' +
+        '<button type="button" class="add-book-btn" id="addBookBtn">+ 신청 도서 추가</button>' +
+
+        '<div class="field-group" style="margin-top:20px;"><label>신청 사유<span class="opt">(선택)</span></label><textarea id="f-reason" placeholder="이 책을 신청하는 이유를 간단히 적어주세요"></textarea></div>' +
+
+        '<button class="submit-btn" id="submitBtn">신청하기 '+svgIcon('arrow')+'</button>' +
+      '</div>' +
+
+      '<footer>'+escapeHTML(siteFullName())+' · 소장도서 검색: <a href="'+SEARCH_URL+'" target="_blank" rel="noopener" style="color:var(--teal)">'+SEARCH_URL+'</a></footer>' +
+      '</div>' +
+
+      '<div class="toast" id="toast">'+svgIcon('check')+'<span>신청이 접수되었습니다. 감사합니다!</span></div>';
+
+    bindNav();
+
+    // ---- 신청 도서(다건) 상태 ----
+    let maxBooks = MAX_BOOKS_STUDENT;
+    let books = [{ title:'', author:'', publisher:'', year:'', price:'' }];
+
+    function bookBlockHTML(book, idx, total){
+      return '<div class="book-block" data-idx="'+idx+'">' +
+        '<div class="book-block-head"><span class="book-block-title">신청 도서 '+(idx+1)+'</span>' +
+          (total > 1 ? '<button type="button" class="book-remove-btn" data-idx="'+idx+'">삭제</button>' : '') +
+        '</div>' +
+        '<div class="field-group"><label>도서명<span class="req">*</span></label><input type="text" class="book-title" data-idx="'+idx+'" value="'+escapeHTML(book.title)+'" placeholder="책 제목을 입력하세요"></div>' +
+        '<div class="error-msg book-err-title" data-idx="'+idx+'">도서명을 입력해 주세요.</div>' +
+        '<div class="field-row" style="grid-template-columns:1fr 1fr;">' +
+          '<div class="field-group"><label>저자<span class="req">*</span></label><input type="text" class="book-author" data-idx="'+idx+'" value="'+escapeHTML(book.author)+'" placeholder="지은이"></div>' +
+          '<div class="field-group"><label>출판사<span class="req">*</span></label><input type="text" class="book-publisher" data-idx="'+idx+'" value="'+escapeHTML(book.publisher)+'" placeholder="출판사명"></div>' +
+        '</div>' +
+        '<div class="error-msg book-err-ap" data-idx="'+idx+'">저자와 출판사를 모두 입력해 주세요.</div>' +
+        '<div class="field-row" style="grid-template-columns:1fr 1fr;">' +
+          '<div class="field-group"><label>출판년도<span class="opt">(선택)</span></label><input type="text" class="book-year" data-idx="'+idx+'" value="'+escapeHTML(book.year)+'" placeholder="예: 2024"></div>' +
+          '<div class="field-group"><label>가격<span class="opt">(선택)</span></label><input type="text" class="book-price" data-idx="'+idx+'" value="'+escapeHTML(book.price)+'" inputmode="numeric" placeholder="예: 15000"></div>' +
+        '</div>' +
+      '</div>';
+    }
+
+    function syncBooksFromDOM(){
+      document.querySelectorAll('.book-block').forEach(function(block){
+        const idx = parseInt(block.getAttribute('data-idx'), 10);
+        books[idx] = {
+          title: block.querySelector('.book-title').value,
+          author: block.querySelector('.book-author').value,
+          publisher: block.querySelector('.book-publisher').value,
+          year: block.querySelector('.book-year').value,
+          price: block.querySelector('.book-price').value
+        };
+      });
+    }
+
+    function bindBookEvents(){
+      document.querySelectorAll('.book-remove-btn').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          syncBooksFromDOM();
+          const idx = parseInt(btn.getAttribute('data-idx'), 10);
+          books.splice(idx, 1);
+          renderBooksSection();
+        });
+      });
+      document.querySelectorAll('.book-price').forEach(function(inp){
+        inp.addEventListener('input', function(){ this.value = this.value.replace(/[^0-9]/g, ''); });
+      });
+    }
+
+    function renderBooksSection(){
+      const container = document.getElementById('books-container');
+      container.innerHTML = books.map(function(b, i){ return bookBlockHTML(b, i, books.length); }).join('');
+      const addBtn = document.getElementById('addBookBtn');
+      const atMax = books.length >= maxBooks;
+      addBtn.disabled = atMax;
+      addBtn.textContent = atMax ? '최대 '+maxBooks+'권까지 신청할 수 있어요' : '+ 신청 도서 추가 ('+books.length+'/'+maxBooks+'권)';
+      bindBookEvents();
+    }
+
+    document.getElementById('addBookBtn').addEventListener('click', function(){
+      syncBooksFromDOM();
+      if(books.length < maxBooks){
+        books.push({ title:'', author:'', publisher:'', year:'', price:'' });
+        renderBooksSection();
+      }
+    });
+
+    renderBooksSection();
+
+    // ---- 요소 참조 ----
+    const $reason = document.getElementById('f-reason');
+    const $grade = document.getElementById('f-grade');
+    const $class = document.getElementById('f-class');
+    const $affil = document.getElementById('f-affil');
+    const $name = document.getElementById('f-name');
+    const $errWho = document.getElementById('err-who');
+    const $toast = document.getElementById('toast');
+
+    // 소장도서 검색
+    function openCatalogSearch(){
+      window.open(SEARCH_URL, '_blank', 'noopener');
+    }
+    document.getElementById('catalogSearchBtn').addEventListener('click', openCatalogSearch);
+
+    // 신청자 구분 토글
+    function toggleApplicantFields(){
+      const isTeacher = document.getElementById('app-teacher').checked;
+      document.getElementById('row-student').style.display = isTeacher ? 'none' : 'grid';
+      document.getElementById('row-teacher').style.display = isTeacher ? 'grid' : 'none';
+
+      syncBooksFromDOM();
+      const newMax = isTeacher ? MAX_BOOKS_TEACHER : MAX_BOOKS_STUDENT;
+      if(books.length > newMax){
+        books = books.slice(0, newMax);
+        showToast(newMax+'권까지 신청 가능하여 초과된 도서 항목이 삭제되었습니다.');
+      }
+      maxBooks = newMax;
+      renderBooksSection();
+    }
+    document.getElementById('app-student').addEventListener('change', toggleApplicantFields);
+    document.getElementById('app-teacher').addEventListener('change', toggleApplicantFields);
+
+    function showToast(msg){
+      $toast.querySelector('span').textContent = msg;
+      $toast.classList.add('show');
+      setTimeout(function(){ $toast.classList.remove('show'); }, 2600);
+    }
+
+    document.getElementById('submitBtn').addEventListener('click', async function(){
+      const isTeacher = document.getElementById('app-teacher').checked;
+      const grade = isTeacher ? '' : $grade.value.trim();
+      const klass = isTeacher ? '' : $class.value.trim();
+      const affil = isTeacher ? $affil.value.trim() : '';
+      const name = $name.value.trim();
+
+      let valid = true;
+
+      let whoOk = true;
+      if(isTeacher){
+        if(!affil){ $affil.classList.add('invalid'); whoOk = false; } else { $affil.classList.remove('invalid'); }
+      } else {
+        if(!grade){ $grade.classList.add('invalid'); whoOk = false; } else { $grade.classList.remove('invalid'); }
+        if(!klass){ $class.classList.add('invalid'); whoOk = false; } else { $class.classList.remove('invalid'); }
+      }
+      if(!name){ $name.classList.add('invalid'); whoOk = false; } else { $name.classList.remove('invalid'); }
+      $errWho.classList.toggle('show', !whoOk);
+      if(!whoOk) valid = false;
+
+      syncBooksFromDOM();
+      let booksValid = true;
+      document.querySelectorAll('.book-block').forEach(function(block){
+        const idx = parseInt(block.getAttribute('data-idx'), 10);
+        const b = books[idx];
+        const titleInput = block.querySelector('.book-title');
+        const authorInput = block.querySelector('.book-author');
+        const publisherInput = block.querySelector('.book-publisher');
+        const errTitle = document.querySelector('.book-err-title[data-idx="'+idx+'"]');
+        const errAP = document.querySelector('.book-err-ap[data-idx="'+idx+'"]');
+        let ok = true;
+        if(!b.title.trim()){ titleInput.classList.add('invalid'); errTitle.classList.add('show'); ok = false; }
+        else { titleInput.classList.remove('invalid'); errTitle.classList.remove('show'); }
+        if(!b.author.trim() || !b.publisher.trim()){
+          authorInput.classList.toggle('invalid', !b.author.trim());
+          publisherInput.classList.toggle('invalid', !b.publisher.trim());
+          errAP.classList.add('show');
+          ok = false;
+        } else {
+          authorInput.classList.remove('invalid');
+          publisherInput.classList.remove('invalid');
+          errAP.classList.remove('show');
+        }
+        if(!ok) booksValid = false;
+      });
+      if(!booksValid) valid = false;
+
+      if(!valid) return;
+
+      const entry = {
+        applicant: isTeacher ? APPLICANT_TYPE2_LABEL : APPLICANT_TYPE1_LABEL,
+        grade: grade,
+        class: klass,
+        affiliation: affil,
+        name: name,
+        books: books.map(function(b){
+          return {
+            title: b.title.trim(),
+            author: b.author.trim(),
+            publisher: b.publisher.trim(),
+            year: b.year.trim(),
+            price: b.price.trim()
+          };
+        }),
+        reason: $reason.value.trim(),
+        ts: Date.now()
+      };
+
+      if(!isWebAppConfigured()){
+        showToast('관리자에게 문의해 주세요. (저장소 연결 필요)');
+        return;
+      }
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      const originalHTML = btn.innerHTML;
+      btn.innerHTML = '접수 중...';
+
+      try{
+        const res = await fetch(WEBAPP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'submit', entry: entry })
+        });
+        const data = await res.json();
+        if(!data || !data.ok) throw new Error('submit_failed');
+        showToast('신청이 접수되었습니다. 감사합니다!');
+        $reason.value = '';
+        $grade.value=''; $class.value=''; $name.value=''; if($affil) $affil.value='';
+        document.getElementById('app-student').checked = true;
+        document.getElementById('row-student').style.display = 'grid';
+        document.getElementById('row-teacher').style.display = 'none';
+        books = [{ title:'', author:'', publisher:'', year:'', price:'' }];
+        maxBooks = MAX_BOOKS_STUDENT;
+        renderBooksSection();
+      }catch(e){
+        showToast('접수 중 오류가 발생했습니다. 다시 시도해 주세요.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalHTML;
+      }
+    });
+  }
+
+  // ================= 관리자 로그인 =================
+  function renderAdminEntry(){
+    if(isAdminAuthed){
+      renderAdminDashboard();
+      return;
+    }
+    app.innerHTML =
+      renderTopNav('admin') +
+      '<div class="page-wrap">' +
+        '<div class="auth-wrap">' +
+          '<div class="auth-card">' +
+            '<div class="auth-icon">'+svgIcon('lock')+'</div>' +
+            '<h2>사서 선생님 전용</h2>' +
+            '<p>관리자 비밀번호를 입력해 주세요.</p>' +
+            '<input type="password" id="admin-pw" placeholder="비밀번호">' +
+            '<div class="error-msg" id="auth-err">비밀번호가 올바르지 않습니다.</div>' +
+            '<button class="submit-btn" id="authBtn">확인 '+svgIcon('arrow')+'</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    bindNav();
+
+    const pwInput = document.getElementById('admin-pw');
+    const err = document.getElementById('auth-err');
+    function tryAuth(){
+      if(pwInput.value === ADMIN_PASSWORD){
+        isAdminAuthed = true;
+        renderAdminDashboard();
+      } else {
+        err.classList.add('show');
+        pwInput.classList.add('invalid');
+      }
+    }
+    document.getElementById('authBtn').addEventListener('click', tryAuth);
+    pwInput.addEventListener('keydown', function(e){ if(e.key === 'Enter') tryAuth(); });
+    pwInput.focus();
+  }
+
+  // ================= 관리자 대시보드 =================
+  function renderAdminDashboard(){
+    app.innerHTML =
+      renderTopNav('admin') +
+      '<div class="page-wrap">' +
+        '<div class="admin-top">' +
+          '<div>' +
+            '<div class="admin-eyebrow">사서 선생님 전용</div>' +
+            '<h1>희망도서 신청 관리</h1>' +
+          '</div>' +
+          '<div class="admin-actions">' +
+            '<span id="admin-count">총 0건</span>' +
+            '<button class="admin-btn" id="refreshBtn">새로고침</button>' +
+            '<button class="admin-btn primary" id="xlsxBtn">엑셀 다운로드</button>' +
+            '<button class="admin-btn primary" id="csvBtn">CSV 다운로드</button>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="deadline-card">' +
+          '<div class="deadline-card-label">사이트 정보</div>' +
+          '<div class="deadline-card-row">' +
+            '<div class="setting-field"><label class="setting-label">학교 이름</label><input type="text" id="school-name-input" value="'+escapeHTML(SCHOOL_NAME)+'" style="min-width:180px;"></div>' +
+            '<div class="setting-field"><label class="setting-label">도서관 이름</label><input type="text" id="library-name-input" value="'+escapeHTML(LIBRARY_NAME)+'" style="min-width:180px;"></div>' +
+            '<button class="admin-btn primary" id="saveSiteInfoBtn">저장</button>' +
+          '</div>' +
+          '<div class="deadline-current">좌측 상단·제목에 "<b id="site-name-text">'+escapeHTML(pageTitleText())+'</b>" 형태로 표시됩니다.</div>' +
+        '</div>' +
+
+        '<div class="deadline-card">' +
+          '<div class="deadline-card-label">신청 조건</div>' +
+          '<div class="deadline-card-row">' +
+            '<div class="setting-field"><label class="setting-label">유형1 이름</label><input type="text" id="type1-label-input" value="'+escapeHTML(APPLICANT_TYPE1_LABEL)+'" style="max-width:120px;"></div>' +
+            '<div class="setting-field"><label class="setting-label">유형1 최대 권수</label><input type="text" inputmode="numeric" id="max-student-input" value="'+MAX_BOOKS_STUDENT+'" style="max-width:90px;"></div>' +
+            '<div class="setting-field"><label class="setting-label">유형2 이름</label><input type="text" id="type2-label-input" value="'+escapeHTML(APPLICANT_TYPE2_LABEL)+'" style="max-width:120px;"></div>' +
+            '<div class="setting-field"><label class="setting-label">유형2 최대 권수</label><input type="text" inputmode="numeric" id="max-teacher-input" value="'+MAX_BOOKS_TEACHER+'" style="max-width:90px;"></div>' +
+            '<button class="admin-btn primary" id="saveLimitsBtn">저장</button>' +
+          '</div>' +
+          '<div class="deadline-current"><b id="type1-label-text">'+escapeHTML(APPLICANT_TYPE1_LABEL)+'</b> 최대 <b id="max-student-text">'+MAX_BOOKS_STUDENT+'</b>권 · <b id="type2-label-text">'+escapeHTML(APPLICANT_TYPE2_LABEL)+'</b> 최대 <b id="max-teacher-text">'+MAX_BOOKS_TEACHER+'</b>권</div>' +
+          '<div class="deadline-current" style="margin-top:4px;color:#9aa3bb;">참고: 유형1은 학년·반 입력, 유형2는 소속 입력 구조는 그대로 유지되고 이름표만 바뀝니다.</div>' +
+        '</div>' +
+
+        '<div class="deadline-card">' +
+          '<div class="deadline-card-label">회차 관리</div>' +
+          '<div class="deadline-card-row">' +
+            '<div class="setting-field"><label class="setting-label">현재 모집명</label><input type="text" id="current-round-label-input" value="'+escapeHTML(CURRENT_ROUND_LABEL)+'" placeholder="예: 2026학년도 하반기" style="min-width:200px;"></div>' +
+            '<div class="setting-field"><label class="setting-label">신청기한</label><input type="datetime-local" id="deadline-input" value="'+deadlineToDatetimeLocalValue()+'"></div>' +
+            '<button class="admin-btn primary" id="saveRoundBtn">저장</button>' +
+          '</div>' +
+          '<div class="deadline-current">현재 모집 중 : <b id="current-round-label-text">'+(CURRENT_ROUND_LABEL ? escapeHTML(CURRENT_ROUND_LABEL) : '미설정')+'</b> · 신청기한 <b id="deadline-current-text">'+formatDeadlineDisplay()+'</b></div>' +
+
+          '<hr style="border:none;border-top:1px solid rgba(20,33,61,0.1);margin:16px 0;">' +
+
+          '<div class="deadline-card-row">' +
+            '<div class="setting-field"><label class="setting-label">조회할 회차</label><select id="round-select" style="border:2px solid var(--line);border-radius:10px;padding:9px 12px;font-size:14px;min-width:220px;"><option>불러오는 중...</option></select></div>' +
+          '</div>' +
+          '<div class="deadline-current" id="round-hint">현재 진행 중인 회차의 신청 내역을 보고 있습니다.</div>' +
+
+          '<div class="archive-box">' +
+            '<div class="deadline-card-label" style="margin-bottom:8px;">현재 회차 마감 · 새로 시작</div>' +
+            '<div class="deadline-card-row">' +
+              '<div class="setting-field"><label class="setting-label">보관할 회차 이름</label><input type="text" id="archive-label-input" value="'+escapeHTML(CURRENT_ROUND_LABEL)+'" placeholder="예: 2026학년도 하반기" style="min-width:220px;"></div>' +
+              '<div class="setting-field"><label class="setting-label">확인을 위해 "마감" 입력</label><input type="text" id="archive-confirm-input" placeholder="마감" style="max-width:100px;"></div>' +
+              '<button class="admin-btn" id="archiveBtn" disabled style="border-color:var(--red);color:var(--red);">마감하고 새로 시작</button>' +
+            '</div>' +
+            '<div class="deadline-current" style="color:var(--red);">⚠ 마감 시 현재 신청 내역은 별도로 보관되고, 새로운 빈 목록이 시작됩니다. 되돌릴 수 없으니 신중히 눌러주세요.</div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="admin-table-wrap">' +
+          '<table>' +
+            '<thead><tr>' +
+              '<th>#</th><th>신청일시</th><th>구분</th><th>학년</th><th>반</th><th>소속</th><th>이름</th>' +
+              '<th>도서명</th><th>저자</th><th>출판사</th><th>출판년도</th><th>가격</th><th>신청사유</th>' +
+            '</tr></thead>' +
+            '<tbody id="admin-tbody"><tr><td class="admin-empty" colspan="13">불러오는 중...</td></tr></tbody>' +
+          '</table>' +
+        '</div>' +
+      '</div>';
+
+    bindNav();
+
+    let currentItems = [];
+
+    function sanitizeFilePart(s){
+      return String(s || '').replace(/[\\/:*?"<>|]/g, '').replace(/\s+/g, '_');
+    }
+
+    function downloadCSV(items){
+      const headers = ['#','신청일시','구분','학년','반','소속','이름','도서명','저자','출판사','출판년도','가격','신청사유'];
+      const esc = function(v){ return '"' + String(v==null?'':v).replace(/"/g,'""') + '"'; };
+      const rows = items.map(function(it,i){
+        return [i+1, new Date(it.ts).toLocaleString('ko-KR'), it.applicant, it.grade, it.class, it.affiliation, it.name, it.title, it.author, it.publisher, it.year, it.price, it.reason].map(esc).join(',');
+      });
+      const csv = '\uFEFF' + headers.map(esc).join(',') + '\r\n' + rows.join('\r\n');
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const today = new Date();
+      const ymd = today.getFullYear() + String(today.getMonth()+1).padStart(2,'0') + String(today.getDate()).padStart(2,'0');
+      const roundPart = currentRound ? ('_' + sanitizeFilePart(currentRound)) : '';
+      a.href = url;
+      a.download = '희망도서신청목록'+roundPart+'_'+ymd+'.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function downloadXLSX(items){
+      const headers = ['#','신청일시','구분','학년','반','소속','이름','도서명','저자','출판사','출판년도','가격','신청사유'];
+      const rows = items.map(function(it,i){
+        return [i+1, new Date(it.ts).toLocaleString('ko-KR'), it.applicant, it.grade, it.class, it.affiliation, it.name, it.title, it.author, it.publisher, it.year, it.price, it.reason];
+      });
+      const wsData = [headers].concat(rows);
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      ws['!cols'] = [
+        {wch:4},{wch:18},{wch:6},{wch:6},{wch:6},{wch:12},{wch:10},
+        {wch:28},{wch:16},{wch:16},{wch:8},{wch:10},{wch:28}
+      ];
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, '희망도서신청');
+      const today = new Date();
+      const ymd = today.getFullYear() + String(today.getMonth()+1).padStart(2,'0') + String(today.getDate()).padStart(2,'0');
+      const roundPart = currentRound ? ('_' + sanitizeFilePart(currentRound)) : '';
+      XLSX.writeFile(wb, '희망도서신청목록'+roundPart+'_'+ymd+'.xlsx');
+    }
+
+    let currentRound = null;
+
+    async function load(){
+      const tbody = document.getElementById('admin-tbody');
+      if(!isWebAppConfigured()){
+        tbody.innerHTML = '<tr><td class="admin-empty" colspan="13">데이터 저장소(WEBAPP_URL)가 아직 연결되지 않았습니다.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = '<tr><td class="admin-empty" colspan="13">불러오는 중...</td></tr>';
+      try{
+        const roundParam = currentRound ? ('&round=' + encodeURIComponent(currentRound)) : '';
+        const res = await fetch(WEBAPP_URL + '?action=list&password=' + encodeURIComponent(ADMIN_PASSWORD) + roundParam);
+        const data = await res.json();
+        if(!data || !data.ok) throw new Error('load_failed');
+        const items = data.items || [];
+        currentItems = items;
+        document.getElementById('admin-count').textContent = '총 ' + items.length + '건';
+        if(items.length === 0){
+          tbody.innerHTML = '<tr><td class="admin-empty" colspan="13">아직 신청 내역이 없습니다.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = items.map(function(it, i){
+          return '<tr>' +
+            '<td>'+(i+1)+'</td>' +
+            '<td>'+escapeHTML(new Date(it.ts).toLocaleString('ko-KR'))+'</td>' +
+            '<td>'+escapeHTML(it.applicant)+'</td>' +
+            '<td>'+escapeHTML(it.grade)+'</td>' +
+            '<td>'+escapeHTML(it.class)+'</td>' +
+            '<td>'+escapeHTML(it.affiliation)+'</td>' +
+            '<td>'+escapeHTML(it.name)+'</td>' +
+            '<td>'+escapeHTML(it.title)+'</td>' +
+            '<td>'+escapeHTML(it.author)+'</td>' +
+            '<td>'+escapeHTML(it.publisher)+'</td>' +
+            '<td>'+escapeHTML(it.year)+'</td>' +
+            '<td>'+escapeHTML(it.price)+'</td>' +
+            '<td>'+escapeHTML(it.reason)+'</td>' +
+          '</tr>';
+        }).join('');
+      }catch(e){
+        tbody.innerHTML = '<tr><td class="admin-empty" colspan="13">목록을 불러오지 못했습니다.</td></tr>';
+      }
+    }
+
+    async function loadArchives(selectValue){
+      const sel = document.getElementById('round-select');
+      try{
+        const res = await fetch(WEBAPP_URL + '?action=archives&password=' + encodeURIComponent(ADMIN_PASSWORD));
+        const data = await res.json();
+        if(!data || !data.ok) throw new Error('archives_failed');
+        const current = data.current;
+        const archives = data.archives || [];
+        let html = '<option value="'+escapeHTML(current)+'">현재 진행 중</option>';
+        archives.slice().reverse().forEach(function(name){
+          html += '<option value="'+escapeHTML(name)+'">'+escapeHTML(name)+'</option>';
+        });
+        sel.innerHTML = html;
+        const want = selectValue || current;
+        sel.value = want;
+        currentRound = sel.value;
+        updateRoundHint(current);
+      }catch(e){
+        sel.innerHTML = '<option value="">불러오기 실패</option>';
+      }
+    }
+
+    function updateRoundHint(currentSheetName){
+      const hint = document.getElementById('round-hint');
+      if(currentRound && currentSheetName && currentRound !== currentSheetName){
+        hint.textContent = '지난 회차 "'+currentRound+'"의 신청 내역을 보고 있습니다. (읽기 전용)';
+      } else {
+        hint.textContent = '현재 진행 중인 회차의 신청 내역을 보고 있습니다.';
+      }
+    }
+
+    document.getElementById('round-select').addEventListener('change', function(){
+      currentRound = this.value;
+      const currentOpt = this.options[0] ? this.options[0].value : null;
+      updateRoundHint(currentOpt);
+      load();
+    });
+
+    document.getElementById('refreshBtn').addEventListener('click', load);
+    document.getElementById('xlsxBtn').addEventListener('click', function(){
+      if(currentItems.length) downloadXLSX(currentItems);
+    });
+    document.getElementById('csvBtn').addEventListener('click', function(){
+      if(currentItems.length) downloadCSV(currentItems);
+    });
+
+    const archiveConfirmInput = document.getElementById('archive-confirm-input');
+    const archiveBtn = document.getElementById('archiveBtn');
+    archiveConfirmInput.addEventListener('input', function(){
+      archiveBtn.disabled = this.value.trim() !== '마감';
+    });
+
+    archiveBtn.addEventListener('click', async function(){
+      const labelInput = document.getElementById('archive-label-input');
+      const label = labelInput.value.trim();
+      if(!window.confirm('현재까지의 신청 내역을 "'+(label || '자동 이름')+'"(으)로 보관하고, 새로운 신청을 받을 빈 목록을 시작합니다.\n계속할까요?')) return;
+
+      const btn = this;
+      btn.disabled = true;
+      const orig = btn.textContent;
+      btn.textContent = '처리 중...';
+      try{
+        const res = await fetch(WEBAPP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'archiveSemester', password: ADMIN_PASSWORD, label: label })
+        });
+        const data = await res.json();
+        if(!data || !data.ok) throw new Error('archive_failed');
+        alert('"'+data.archivedAs+'" 회차로 보관되었습니다. 새 신청 목록이 시작됩니다.');
+        labelInput.value = '';
+        archiveConfirmInput.value = '';
+        CURRENT_ROUND_LABEL = '';
+        const labelInputField = document.getElementById('current-round-label-input');
+        const labelTextEl = document.getElementById('current-round-label-text');
+        if(labelInputField) labelInputField.value = '';
+        if(labelTextEl) labelTextEl.textContent = '미설정';
+        currentRound = null;
+        await loadArchives();
+        load();
+      }catch(e){
+        alert('보관 처리에 실패했습니다. 다시 시도해 주세요.');
+      } finally {
+        btn.disabled = archiveConfirmInput.value.trim() !== '마감';
+        btn.textContent = orig;
+      }
+    });
+
+    document.getElementById('saveLimitsBtn').addEventListener('click', async function(){
+      const studentVal = parseInt(document.getElementById('max-student-input').value, 10);
+      const teacherVal = parseInt(document.getElementById('max-teacher-input').value, 10);
+      const type1Val = document.getElementById('type1-label-input').value.trim();
+      const type2Val = document.getElementById('type2-label-input').value.trim();
+
+      if(isNaN(studentVal) || studentVal < 1){ alert('유형1 최대 권수를 1 이상의 숫자로 입력해 주세요.'); return; }
+      if(isNaN(teacherVal) || teacherVal < 1){ alert('유형2 최대 권수를 1 이상의 숫자로 입력해 주세요.'); return; }
+      if(!type1Val){ alert('유형1 이름을 입력해 주세요.'); return; }
+      if(!type2Val){ alert('유형2 이름을 입력해 주세요.'); return; }
+
+      const btn = document.getElementById('saveLimitsBtn');
+      btn.disabled = true;
+      const orig = btn.textContent;
+      btn.textContent = '저장 중...';
+      try{
+        const res = await fetch(WEBAPP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'setSettings',
+            password: ADMIN_PASSWORD,
+            maxBooksStudent: studentVal,
+            maxBooksTeacher: teacherVal,
+            applicantType1Label: type1Val,
+            applicantType2Label: type2Val
+          })
+        });
+        const data = await res.json();
+        if(!data || !data.ok) throw new Error('save_failed');
+        MAX_BOOKS_STUDENT = studentVal;
+        MAX_BOOKS_TEACHER = teacherVal;
+        APPLICANT_TYPE1_LABEL = type1Val;
+        APPLICANT_TYPE2_LABEL = type2Val;
+        document.getElementById('max-student-text').textContent = studentVal;
+        document.getElementById('max-teacher-text').textContent = teacherVal;
+        document.getElementById('type1-label-text').textContent = type1Val;
+        document.getElementById('type2-label-text').textContent = type2Val;
+      }catch(e){
+        alert('저장에 실패했습니다. 다시 시도해 주세요.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = orig;
+      }
+    });
+
+    document.getElementById('saveSiteInfoBtn').addEventListener('click', async function(){
+      const schoolVal = document.getElementById('school-name-input').value.trim();
+      const libraryVal = document.getElementById('library-name-input').value.trim();
+
+      if(!schoolVal){ alert('학교 이름을 입력해 주세요.'); return; }
+      if(!libraryVal){ alert('도서관 이름을 입력해 주세요.'); return; }
+
+      const btn = document.getElementById('saveSiteInfoBtn');
+      btn.disabled = true;
+      const orig = btn.textContent;
+      btn.textContent = '저장 중...';
+      try{
+        const res = await fetch(WEBAPP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'setSettings',
+            password: ADMIN_PASSWORD,
+            schoolName: schoolVal,
+            libraryName: libraryVal
+          })
+        });
+        const data = await res.json();
+        if(!data || !data.ok) throw new Error('save_failed');
+        SCHOOL_NAME = schoolVal;
+        LIBRARY_NAME = libraryVal;
+        document.title = pageTitleText();
+        document.getElementById('site-name-text').textContent = pageTitleText();
+        const navBrand = document.querySelector('.nav-brand');
+        if(navBrand) navBrand.textContent = siteFullName();
+      }catch(e){
+        alert('저장에 실패했습니다. 다시 시도해 주세요.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = orig;
+      }
+    });
+
+    document.getElementById('saveRoundBtn').addEventListener('click', async function(){
+      const deadlineVal = document.getElementById('deadline-input').value;
+      const labelVal = document.getElementById('current-round-label-input').value.trim();
+
+      if(!deadlineVal){ alert('신청기한을 입력해 주세요.'); return; }
+      const newDeadline = new Date(deadlineVal);
+      if(isNaN(newDeadline.getTime())){ alert('신청기한 형식이 올바르지 않습니다.'); return; }
+
+      const btn = document.getElementById('saveRoundBtn');
+      btn.disabled = true;
+      const orig = btn.textContent;
+      btn.textContent = '저장 중...';
+      try{
+        const res = await fetch(WEBAPP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'setSettings',
+            password: ADMIN_PASSWORD,
+            deadline: newDeadline.toISOString(),
+            currentRoundLabel: labelVal
+          })
+        });
+        const data = await res.json();
+        if(!data || !data.ok) throw new Error('save_failed');
+        DEADLINE = newDeadline;
+        CURRENT_ROUND_LABEL = labelVal;
+        document.getElementById('deadline-current-text').textContent = formatDeadlineDisplay();
+        document.getElementById('current-round-label-text').textContent = labelVal || '미설정';
+        const archiveLabelInput = document.getElementById('archive-label-input');
+        if(archiveLabelInput && !archiveLabelInput.value.trim()){
+          archiveLabelInput.value = labelVal;
+        }
+      }catch(e){
+        alert('저장에 실패했습니다. 다시 시도해 주세요.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = orig;
+      }
+    });
+
+    loadArchives().then(load);
+  }
+
+  // ================= 초기화 =================
+  function init(){
+    navigateTo('apply');
+    loadSettings().then(function(){
+      document.title = pageTitleText();
+      if(currentView === 'apply'){
+        navigateTo('apply');
+      }
+    });
+  }
+  init();
+})();
+</script>
+</body>
+</html>
