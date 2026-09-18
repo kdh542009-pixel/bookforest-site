@@ -710,17 +710,23 @@
 
   // ================= 신청 화면 =================
   let settingsLoaded = false;
+  let settingsTimedOut = false;
 
   function renderApplyView(){
-    if(!settingsLoaded){
-      renderLoadingSkeleton();
+    if(settingsLoaded){
+      if(isExpiredNow()){
+        renderExpired();
+      } else {
+        renderForm();
+      }
       return;
     }
-    if(isExpiredNow()){
-      renderExpired();
-    } else {
+    if(settingsTimedOut){
+      // 응답이 너무 늦어지면 일단 폼을 먼저 보여주고, 실제 데이터가 도착하면 조용히 교정합니다.
       renderForm();
+      return;
     }
+    renderLoadingSkeleton();
   }
 
   function renderLoadingSkeleton(){
@@ -1440,7 +1446,18 @@
   // ================= 초기화 =================
   function init(){
     navigateTo('apply');
+
+    const timeoutTimer = setTimeout(function(){
+      if(!settingsLoaded){
+        settingsTimedOut = true;
+        if(currentView === 'apply'){
+          navigateTo('apply');
+        }
+      }
+    }, 2000);
+
     loadSettings().then(function(){
+      clearTimeout(timeoutTimer);
       document.title = pageTitleText();
       if(currentView === 'apply'){
         navigateTo('apply');
@@ -1452,4 +1469,3 @@
 </script>
 </body>
 </html>
-
